@@ -46,11 +46,12 @@ export default {
       dialogVisible: false,
       book: { name: "", price: "" },
       curbook: {},
-      books: []
+      books: [],
+      baseUrl: 'http://39.100.81.23:3000'
     };
   },
   created() {
-    fetch('http://localhost:3000/books', { method: 'GET' })
+    fetch(`${this.baseUrl}/books`, { method: 'GET' })
       .then(res => res.json())
       .then(data => this.books = data)
   },
@@ -62,7 +63,7 @@ export default {
       // this.book.id = ++maxId;
       // let book = this._.cloneDeep(this.book);
       // this.books.push(book);
-      fetch('http://localhost:3000/books', { 
+      fetch(`${this.baseUrl}/books`, { 
         method: 'POST', 
         body: JSON.stringify(this.book),
         headers: {
@@ -95,7 +96,7 @@ export default {
     deleteBook(book) {
       // let index = this.books.findIndex(item => item.id===book.row.id)
       // this.books.splice(index, 1)
-      fetch(`http://localhost:3000/books/${book.row.id}`, { method: 'DELETE'})
+      fetch(`${this.baseUrl}/books/${book.row.id}`, { method: 'DELETE'})
         .then(res => res.json())
         .then(data => this.books = data)
     },
@@ -106,7 +107,7 @@ export default {
     confirmEdit() {
       // let index = this.books.findIndex(item => item.id === this.curbook.id)
       // this.books.splice(index, 1, this.curbook)
-      fetch(`http://localhost:3000/books/${this.curbook.id}`, { 
+      fetch(`${this.baseUrl}/books/${this.curbook.id}`, { 
         method: 'PUT',
         body: JSON.stringify(this.curbook),
         headers: {

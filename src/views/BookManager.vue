@@ -17,16 +17,23 @@
       <el-table-column prop="price" label="价格"></el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="book">
-          <el-button @click="handleClick(book)" type="text" size="small">删除</el-button>
-          <el-button @click="dialogVisible=true" type="text" size="small">编辑</el-button>
+          <el-button @click="handleDelete(book)" type="text" size="small">删除</el-button>
+          <el-button @click="handleEdit(book)" type="text" size="small">修改</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-dialog title="提示" :visible.sync="dialogVisible" width="40%">
-      <span>确定修改吗？</span>
+    <el-dialog title="修改信息" :visible.sync="dialogVisible" width="40%">
+      <el-form :model="curbook">
+        <el-form-item label="图书名称" label-width="80px">
+          <el-input v-model="curbook.name"></el-input>
+        </el-form-item>
+        <el-form-item label="图书价格" label-width="80px">
+          <el-input v-model="curbook.price"></el-input>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="confirmEdit">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -38,6 +45,7 @@ export default {
     return {
       dialogVisible: false,
       book: { name: "", price: "" },
+      curbook: {},
       books: [
         { id: 1, name: "java", price: 60 },
         { id: 2, name: "javascript", price: 66 },
@@ -48,12 +56,13 @@ export default {
   methods: {
     onSubmit() {
       if (!this.book.name||!this.book.price) return;
-      let maxId = this.books[this.books.length-1].id
+      let len = this.books.length;
+      let maxId = len > 0? this.books[len-1].id : 0;
       this.book.id = ++maxId;
       let book = this._.cloneDeep(this.book);
       this.books.push(book);
     },
-    handleClick(book) {
+    handleDelete(book) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -72,8 +81,17 @@ export default {
         });
     },
     deleteBook(book) {
-      let index = this.books.findIndex(item => item.id===book.id)
+      let index = this.books.findIndex(item => item.id===book.row.id)
       this.books.splice(index, 1)
+    },
+    handleEdit(book) {
+      this.curbook = this._.cloneDeep(book.row);
+      this.dialogVisible = true;
+    },
+    confirmEdit() {
+      let index = this.books.findIndex(item => item.id === this.curbook.id)
+      this.books.splice(index, 1, this.curbook)
+      this.dialogVisible = false
     }
   }
 };

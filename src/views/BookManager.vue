@@ -8,7 +8,7 @@
         <el-input v-model.number="book.price" placeholder="请输入图书价格"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">添加</el-button>
+        <el-button type="primary" @click="addBook">添加</el-button>
       </el-form-item>
     </el-form>
     <el-table :data="books" border style="width: 60%;margin: 0 auto;">
@@ -46,21 +46,33 @@ export default {
       dialogVisible: false,
       book: { name: "", price: "" },
       curbook: {},
-      books: [
-        { id: 1, name: "java", price: 60 },
-        { id: 2, name: "javascript", price: 66 },
-        { id: 3, name: "python", price: 55 }
-      ]
+      books: []
     };
   },
+  created() {
+    fetch('http://localhost:3000/books', { method: 'GET' })
+      .then(res => res.json())
+      .then(data => this.books = data)
+  },
   methods: {
-    onSubmit() {
+    addBook() {
       if (!this.book.name||!this.book.price) return;
-      let len = this.books.length;
-      let maxId = len > 0? this.books[len-1].id : 0;
-      this.book.id = ++maxId;
-      let book = this._.cloneDeep(this.book);
-      this.books.push(book);
+      // let len = this.books.length;
+      // let maxId = len > 0? this.books[len-1].id : 0;
+      // this.book.id = ++maxId;
+      // let book = this._.cloneDeep(this.book);
+      // this.books.push(book);
+      fetch('http://localhost:3000/books', { 
+        method: 'POST', 
+        body: JSON.stringify(this.book),
+        headers: {
+          'content-type': 'application/json'
+        }})
+        .then(res => res.json())
+        .then(data => {
+          this.books = data
+          this.book = { name: "", price: "" }
+        })
     },
     handleDelete(book) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
@@ -81,17 +93,29 @@ export default {
         });
     },
     deleteBook(book) {
-      let index = this.books.findIndex(item => item.id===book.row.id)
-      this.books.splice(index, 1)
+      // let index = this.books.findIndex(item => item.id===book.row.id)
+      // this.books.splice(index, 1)
+      fetch(`http://localhost:3000/books/${book.row.id}`, { method: 'DELETE'})
+        .then(res => res.json())
+        .then(data => this.books = data)
     },
     handleEdit(book) {
       this.curbook = this._.cloneDeep(book.row);
       this.dialogVisible = true;
     },
     confirmEdit() {
-      let index = this.books.findIndex(item => item.id === this.curbook.id)
-      this.books.splice(index, 1, this.curbook)
-      this.dialogVisible = false
+      // let index = this.books.findIndex(item => item.id === this.curbook.id)
+      // this.books.splice(index, 1, this.curbook)
+      fetch(`http://localhost:3000/books/${this.curbook.id}`, { 
+        method: 'PUT',
+        body: JSON.stringify(this.curbook),
+        headers: {
+          'content-type': 'application/json'
+        }}).then(res => res.json())
+        .then(data => {
+          this.books = data
+          this.dialogVisible = false
+        })
     }
   }
 };
